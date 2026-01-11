@@ -29,4 +29,4 @@ void main() {
     vec3 color = mix(shapeColor, background, circle);
     
     gl_FragColor = vec4(color, 1.0);
-}
+}   
