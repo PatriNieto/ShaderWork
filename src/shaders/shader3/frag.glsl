@@ -9,9 +9,14 @@ varying vec2 vUv;
 void main() {
     vec2 uv = vUv - 0.5;
     
-    // Ajustar aspect ratio
+    // Ajustar aspect ratio correctamente (IGUAL que los otros)
     float aspect = u_resolution.x / u_resolution.y;
-    uv.x *= aspect;
+    
+    if (aspect > 1.0) {
+        uv.x *= aspect;
+    } else {
+        uv.y /= aspect;
+    }
 
     vec3 color = vec3(0.0);
     int numSquares = 10;
@@ -22,12 +27,10 @@ void main() {
         float size = maxSize * (1.0 - t);
         float thickness = 0.02;
 
-        // Cuadrado exterior (cambié st por uv)
         float outerX = step(-size, uv.x) * step(uv.x, size);
         float outerY = step(-size, uv.y) * step(uv.y, size);
         float outer = outerX * outerY;
 
-        // Cuadrado interior (cambié st por uv)
         float innerSize = size - thickness;
         float innerX = step(-innerSize, uv.x) * step(uv.x, innerSize);
         float innerY = step(-innerSize, uv.y) * step(uv.y, innerSize);

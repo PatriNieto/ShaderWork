@@ -144,36 +144,45 @@ class FullscreenViewer {
     this.animate();
   }
   
-  loadShader(index) {
-    // Limpiar escena anterior
-    while(this.scene.children.length > 0) { 
-      this.scene.remove(this.scene.children[0]); 
-    }
-    
-    const shader = this.shaders[index];
-    
-    const uniforms = {
-      u_time: { value: 0.0 },
-      u_resolution: { value: new THREE.Vector2() }
-    };
-    
-    const geometry = new THREE.PlaneGeometry(2, 2);
-    const material = new THREE.ShaderMaterial({
-      vertexShader: shader.vertex,
-      fragmentShader: shader.fragment,
-      uniforms: uniforms
-    });
-    
-    this.currentUniforms = uniforms;
-    this.resize();
-    
-    const mesh = new THREE.Mesh(geometry, material);
-    this.scene.add(mesh);
-    
-    this.container.querySelector('.fullscreen-title').textContent = shader.name;
-    
-    this.clock = new THREE.Clock();
+ loadShader(index) {
+  // Limpiar escena anterior
+  while(this.scene.children.length > 0) { 
+    this.scene.remove(this.scene.children[0]); 
   }
+  
+  const shader = this.shaders[index];
+  
+  // Obtener dimensiones ANTES de crear uniforms
+  const width = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+  const height = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  
+  // Crear uniforms CON valores correctos desde el inicio
+  const uniforms = {
+    u_time: { value: 0.0 },
+    u_resolution: { value: new THREE.Vector2(width, height) }
+  };
+  
+  const geometry = new THREE.PlaneGeometry(2, 2);
+  const material = new THREE.ShaderMaterial({
+    vertexShader: shader.vertex,
+    fragmentShader: shader.fragment,
+    uniforms: uniforms
+  });
+  
+  this.currentUniforms = uniforms;
+  
+  const mesh = new THREE.Mesh(geometry, material);
+  this.scene.add(mesh);
+  
+  // Actualizar título
+  this.container.querySelector('.fullscreen-title').textContent = shader.name;
+  
+  // Resetear reloj
+  this.clock = new THREE.Clock();
+  
+  // Forzar un render inmediato
+  this.renderer.render(this.scene, this.camera);
+}
   
   setupEvents() {
     // WHEEL para desktop
