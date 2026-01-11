@@ -259,8 +259,13 @@ class FullscreenViewer {
     document.addEventListener('keydown', this.onKeyDown);
 
     // RESIZE
-    this.onResize = () => this.resize();
-    window.addEventListener('resize', this.onResize);
+ this.onResize = () => this.resize();
+  window.addEventListener('resize', this.onResize);
+  
+  // VISUAL VIEWPORT para móvil (importante)
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', this.onResize);
+  }
   }
   
   animate = () => {
@@ -275,22 +280,23 @@ class FullscreenViewer {
     this.renderer.render(this.scene, this.camera);
   }
   
-  resize() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    
-    this.renderer.setSize(width, height);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    
-    if (this.currentUniforms) {
-      this.currentUniforms.u_resolution.value.set(width, height);
-    }
-    
-    // Render inmediato después de resize
-    if (this.isActive && this.scene && this.camera) {
-      this.renderer.render(this.scene, this.camera);
-    }
+resize() {
+  // Usar visualViewport para móvil (excluye barras del navegador)
+  const width = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+  const height = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  
+  this.renderer.setSize(width, height);
+  this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  
+  if (this.currentUniforms) {
+    this.currentUniforms.u_resolution.value.set(width, height);
   }
+  
+  // Render inmediato después de resize
+  if (this.isActive && this.scene && this.camera) {
+    this.renderer.render(this.scene, this.camera);
+  }
+}
   
   show() {
     document.body.style.overflow = 'hidden';
@@ -311,8 +317,11 @@ class FullscreenViewer {
       this.container.removeEventListener('touchend', this.onTouchEnd);
       this.container.removeEventListener('click', this.onClick);
       document.removeEventListener('keydown', this.onKeyDown);
-      window.removeEventListener('resize', this.onResize);
       
+      window.removeEventListener('resize', this.onResize);
+    if (window.visualViewport) {
+      window.visualViewport.removeEventListener('resize', this.onResize);
+    }
       // Limpiar Three.js
       this.renderer.dispose();
       
