@@ -195,30 +195,18 @@ class FullscreenViewer {
   }
   
 setupEvents() {
-  // --- SCROLL ---
+  // --- WHEEL para desktop ---
   this.wheelLock = false;
-  this.lastDirection = 0;
   this.cooldown = 400;
 
   this.onWheel = (e) => {
-    e.preventDefault(); // evita scroll de la página
-
+    e.preventDefault();
     if (this.wheelLock) return;
-
-    const delta = e.deltaY;
-
-    // ignorar micro-scrolls
-    if (Math.abs(delta) < 20) return;
-
-    const direction = Math.sign(delta);
-
-    if (direction !== this.lastDirection) {
-      this.lastDirection = direction;
-    }
+    if (Math.abs(e.deltaY) < 20) return;
 
     this.wheelLock = true;
 
-    if (direction > 0) {
+    if (e.deltaY > 0) {
       this.currentIndex = (this.currentIndex + 1) % this.shaders.length;
     } else {
       this.currentIndex = (this.currentIndex - 1 + this.shaders.length) % this.shaders.length;
@@ -226,27 +214,65 @@ setupEvents() {
 
     this.loadShader(this.currentIndex);
 
-    // reset para evitar inercia
-    this.lastDirection = 0;
-
     setTimeout(() => {
       this.wheelLock = false;
     }, this.cooldown);
   };
 
-  // Escucha del wheel en container
   this.container.addEventListener('wheel', this.onWheel, { passive: false });
 
-  // --- CLICK PARA CERRAR ---
+  // --- TOUCH para móvil ---
+  this.touchStartY = 0;
+  this.touchLock = false;
+
+  this.onTouchStart = (e) => {
+    this.touchStartY = e.touches[0].clientY;
+  };
+
+  this.onTouchMove = (e) => {
+    if (this.touchLock) return;
+    
+    const touchY = e.touches[0].clientY;
+    const deltaY = this.touchStartY - touchY;
+
+    // Requiere un movimiento mínimo de 50px
+    if (Math.abs(deltaY) > 50) {
+      e.preventDefault();
+      this.touchLock = true;
+
+      if (deltaY > 0) {
+        // Swipe hacia arriba - siguiente shader
+        this.currentIndex = (this.currentIndex + 1) % this.shaders.length;
+      } else {
+        // Swipe hacia abajo - shader anterior
+        this.currentIndex = (this.currentIndex - 1 + this.shaders.length) % this.shaders.length;
+      }
+
+      this.loadShader(this.currentIndex);
+
+      setTimeout(() => {
+        this.touchLock = false;
+      }, this.cooldown);
+    }
+  };
+
+  this.onTouchEnd = () => {
+    this.touchStartY = 0;
+  };
+
+  this.container.addEventListener('touchstart', this.onTouchStart, { passive: true });
+  this.container.addEventListener('touchmove', this.onTouchMove, { passive: false });
+  this.container.addEventListener('touchend', this.onTouchEnd, { passive: true });
+
+  // --- CLICK para cerrar ---
   this.onClick = (e) => {
-    // si clicas en el fondo o canvas, cerrar
     if (e.target === this.container || e.target.classList.contains('fullscreen-canvas')) {
       this.close();
     }
   };
   this.container.addEventListener('click', this.onClick);
 
-  // --- ESC PARA CERRAR ---
+  // --- ESC para cerrar ---
   this.onKeyDown = (e) => {
     if (e.key === 'Escape') {
       this.close();
@@ -254,7 +280,7 @@ setupEvents() {
   };
   document.addEventListener('keydown', this.onKeyDown);
 
-  // --- REDIMENSIONAMIENTO ---
+  // --- RESIZE ---
   window.addEventListener('resize', () => this.resize());
 }
 
