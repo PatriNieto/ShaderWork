@@ -9,14 +9,9 @@ varying vec2 vUv;
 void main() {
     vec2 uv = vUv - 0.5;
     
-    // Ajustar aspect ratio correctamente
+    // Ajustar aspect ratio (igual que shader 3)
     float aspect = u_resolution.x / u_resolution.y;
-    
-    if (aspect > 1.0) {
-        uv.x *= aspect;
-    } else {
-        uv.y /= aspect;
-    }
+    uv.x *= aspect;
     
     float d = length(uv);
     float pulse = 0.5 + 0.5 * sin(u_time - d * 20.0);
