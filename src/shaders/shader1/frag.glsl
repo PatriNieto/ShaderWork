@@ -13,10 +13,8 @@ void main() {
     float aspect = u_resolution.x / u_resolution.y;
     
     if (aspect > 1.0) {
-        // Pantalla horizontal: estirar X
         uv.x *= aspect;
     } else {
-        // Pantalla vertical (móvil): estirar Y
         uv.y /= aspect;
     }
     

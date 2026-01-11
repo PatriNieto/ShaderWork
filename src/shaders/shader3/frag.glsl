@@ -9,7 +9,7 @@ varying vec2 vUv;
 void main() {
     vec2 uv = vUv - 0.5;
     
-    // Ajustar aspect ratio correctamente (IGUAL que los otros)
+    // Ajustar aspect ratio correctamente
     float aspect = u_resolution.x / u_resolution.y;
     
     if (aspect > 1.0) {
