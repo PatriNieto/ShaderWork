@@ -9,9 +9,16 @@ varying vec2 vUv;
 void main() {
     vec2 uv = vUv - 0.5;
     
-    // Solo multiplicar X por aspect ratio
+    // Ajustar aspect ratio correctamente
     float aspect = u_resolution.x / u_resolution.y;
-    uv.x *= aspect;
+    
+    if (aspect > 1.0) {
+        // Pantalla horizontal: estirar X
+        uv.x *= aspect;
+    } else {
+        // Pantalla vertical (móvil): estirar Y
+        uv.y /= aspect;
+    }
     
     float d = length(uv);
     float pulse = 0.5 + 0.5 * sin(u_time - d * 20.0);
