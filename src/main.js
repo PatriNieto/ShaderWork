@@ -3,10 +3,8 @@ import * as THREE from 'three';
 // Importa tus shaders como texto raw
 import vertexShader1 from './shaders/shader1/vertex.glsl?raw';
 import fragmentShader1 from './shaders/shader1/frag.glsl?raw';
-
 import vertexShader2 from './shaders/shader2/vertex.glsl?raw';
 import fragmentShader2 from './shaders/shader2/frag.glsl?raw';
-
 import vertexShader3 from './shaders/shader3/vertex.glsl?raw';
 import fragmentShader3 from './shaders/shader3/frag.glsl?raw';
 
@@ -30,7 +28,7 @@ const shaders = [
       u_resolution: { value: new THREE.Vector2() }
     }
   },
-    {
+  {
     name: 'Pyramid',
     vertex: vertexShader3,
     fragment: fragmentShader3,
@@ -68,8 +66,6 @@ class ShaderPreview {
     
     this.renderer.setSize(size, size);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    
-    // IMPORTANTE: Añadir color de fondo
     this.renderer.setClearColor(0x000000);
     
     canvas.replaceWith(this.renderer.domElement);
@@ -104,18 +100,13 @@ class ShaderPreview {
   }
 }
 
-// Fullscreen viewer - SOLO ERRORES CRÍTICOS CORREGIDOS
+// Fullscreen viewer
 class FullscreenViewer {
   constructor(shaders, startIndex) {
     this.shaders = shaders;
     this.currentIndex = startIndex;
-    this.isScrolling = false;
-    this.isActive = true; // AÑADIDO: variable para controlar animación
+    this.isActive = true;
     
-      this.canScroll = true;
-  this.scrollThreshold = 100; // Scroll mínimo necesario
-  this.scrollDelay = 500; // Tiempo entre cambios
-  
     this.createDOM();
     this.createRenderer();
     this.setupEvents();
@@ -136,18 +127,14 @@ class FullscreenViewer {
     this.scene = new THREE.Scene();
     this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
     
-    // CORREGIDO: Crear canvas y renderer correctamente
     this.renderer = new THREE.WebGLRenderer({ 
       antialias: true,
       alpha: false
     });
     
-    // IMPORTANTE: Establecer color de fondo NEGRO
     this.renderer.setClearColor(0x000000);
-    
     this.clock = new THREE.Clock();
     
-    // Añadir el canvas al DOM
     const canvas = this.renderer.domElement;
     canvas.className = 'fullscreen-canvas';
     this.container.insertBefore(canvas, this.container.firstChild);
@@ -158,17 +145,13 @@ class FullscreenViewer {
   }
   
   loadShader(index) {
-    
-    
     // Limpiar escena anterior
     while(this.scene.children.length > 0) { 
-      const child = this.scene.children[0];
-      this.scene.remove(child); 
+      this.scene.remove(this.scene.children[0]); 
     }
     
     const shader = this.shaders[index];
     
-    // CORREGIDO: Usar los uniforms del shader correctamente
     const uniforms = {
       u_time: { value: 0.0 },
       u_resolution: { value: new THREE.Vector2() }
@@ -182,109 +165,103 @@ class FullscreenViewer {
     });
     
     this.currentUniforms = uniforms;
-    this.resize(); // Actualizar resolución
+    this.resize();
     
     const mesh = new THREE.Mesh(geometry, material);
     this.scene.add(mesh);
     
-    // Actualizar título
     this.container.querySelector('.fullscreen-title').textContent = shader.name;
     
-    // Resetear reloj
     this.clock = new THREE.Clock();
   }
   
-setupEvents() {
-  // --- WHEEL para desktop ---
-  this.wheelLock = false;
-  this.cooldown = 400;
+  setupEvents() {
+    // WHEEL para desktop
+    this.wheelLock = false;
+    this.cooldown = 400;
 
-  this.onWheel = (e) => {
-    e.preventDefault();
-    if (this.wheelLock) return;
-    if (Math.abs(e.deltaY) < 20) return;
-
-    this.wheelLock = true;
-
-    if (e.deltaY > 0) {
-      this.currentIndex = (this.currentIndex + 1) % this.shaders.length;
-    } else {
-      this.currentIndex = (this.currentIndex - 1 + this.shaders.length) % this.shaders.length;
-    }
-
-    this.loadShader(this.currentIndex);
-
-    setTimeout(() => {
-      this.wheelLock = false;
-    }, this.cooldown);
-  };
-
-  this.container.addEventListener('wheel', this.onWheel, { passive: false });
-
-  // --- TOUCH para móvil ---
-  this.touchStartY = 0;
-  this.touchLock = false;
-
-  this.onTouchStart = (e) => {
-    this.touchStartY = e.touches[0].clientY;
-  };
-
-  this.onTouchMove = (e) => {
-    if (this.touchLock) return;
-    
-    const touchY = e.touches[0].clientY;
-    const deltaY = this.touchStartY - touchY;
-
-    // Requiere un movimiento mínimo de 50px
-    if (Math.abs(deltaY) > 50) {
+    this.onWheel = (e) => {
       e.preventDefault();
-      this.touchLock = true;
+      if (this.wheelLock) return;
+      if (Math.abs(e.deltaY) < 20) return;
 
-      if (deltaY > 0) {
-        // Swipe hacia arriba - siguiente shader
+      this.wheelLock = true;
+
+      if (e.deltaY > 0) {
         this.currentIndex = (this.currentIndex + 1) % this.shaders.length;
       } else {
-        // Swipe hacia abajo - shader anterior
         this.currentIndex = (this.currentIndex - 1 + this.shaders.length) % this.shaders.length;
       }
 
       this.loadShader(this.currentIndex);
 
       setTimeout(() => {
-        this.touchLock = false;
+        this.wheelLock = false;
       }, this.cooldown);
-    }
-  };
+    };
 
-  this.onTouchEnd = () => {
+    this.container.addEventListener('wheel', this.onWheel, { passive: false });
+
+    // TOUCH para móvil
     this.touchStartY = 0;
-  };
+    this.touchLock = false;
 
-  this.container.addEventListener('touchstart', this.onTouchStart, { passive: true });
-  this.container.addEventListener('touchmove', this.onTouchMove, { passive: false });
-  this.container.addEventListener('touchend', this.onTouchEnd, { passive: true });
+    this.onTouchStart = (e) => {
+      this.touchStartY = e.touches[0].clientY;
+    };
 
-  // --- CLICK para cerrar ---
-  this.onClick = (e) => {
-    if (e.target === this.container || e.target.classList.contains('fullscreen-canvas')) {
-      this.close();
-    }
-  };
-  this.container.addEventListener('click', this.onClick);
+    this.onTouchMove = (e) => {
+      if (this.touchLock) return;
+      
+      const touchY = e.touches[0].clientY;
+      const deltaY = this.touchStartY - touchY;
 
-  // --- ESC para cerrar ---
-  this.onKeyDown = (e) => {
-    if (e.key === 'Escape') {
-      this.close();
-    }
-  };
-  document.addEventListener('keydown', this.onKeyDown);
+      if (Math.abs(deltaY) > 50) {
+        e.preventDefault();
+        this.touchLock = true;
 
-  // --- RESIZE ---
-  window.addEventListener('resize', () => this.resize());
-}
+        if (deltaY > 0) {
+          this.currentIndex = (this.currentIndex + 1) % this.shaders.length;
+        } else {
+          this.currentIndex = (this.currentIndex - 1 + this.shaders.length) % this.shaders.length;
+        }
 
+        this.loadShader(this.currentIndex);
 
+        setTimeout(() => {
+          this.touchLock = false;
+        }, this.cooldown);
+      }
+    };
+
+    this.onTouchEnd = () => {
+      this.touchStartY = 0;
+    };
+
+    this.container.addEventListener('touchstart', this.onTouchStart, { passive: true });
+    this.container.addEventListener('touchmove', this.onTouchMove, { passive: false });
+    this.container.addEventListener('touchend', this.onTouchEnd, { passive: true });
+
+    // CLICK para cerrar
+    this.onClick = (e) => {
+      if (e.target === this.container || e.target.classList.contains('fullscreen-canvas')) {
+        this.close();
+      }
+    };
+    this.container.addEventListener('click', this.onClick);
+
+    // ESC para cerrar
+    this.onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        this.close();
+      }
+    };
+    document.addEventListener('keydown', this.onKeyDown);
+
+    // RESIZE
+    this.onResize = () => this.resize();
+    window.addEventListener('resize', this.onResize);
+  }
   
   animate = () => {
     if (!this.isActive) return;
@@ -308,6 +285,11 @@ setupEvents() {
     if (this.currentUniforms) {
       this.currentUniforms.u_resolution.value.set(width, height);
     }
+    
+    // Render inmediato después de resize
+    if (this.isActive && this.scene && this.camera) {
+      this.renderer.render(this.scene, this.camera);
+    }
   }
   
   show() {
@@ -322,8 +304,11 @@ setupEvents() {
     this.container.classList.remove('active');
     
     setTimeout(() => {
-      // Limpiar event listeners
+      // Limpiar TODOS los event listeners
       this.container.removeEventListener('wheel', this.onWheel);
+      this.container.removeEventListener('touchstart', this.onTouchStart);
+      this.container.removeEventListener('touchmove', this.onTouchMove);
+      this.container.removeEventListener('touchend', this.onTouchEnd);
       this.container.removeEventListener('click', this.onClick);
       document.removeEventListener('keydown', this.onKeyDown);
       window.removeEventListener('resize', this.onResize);
@@ -359,14 +344,11 @@ shaders.forEach((shader, index) => {
   const preview = new ShaderPreview(container, shader, index);
   previews.push(preview);
   
-  // Click para abrir en fullscreen
   container.addEventListener('click', () => {
     new FullscreenViewer(shaders, index);
   });
 });
 
-// Manejar redimensionamiento
 window.addEventListener('resize', () => {
   previews.forEach(preview => preview.resize());
 });
-
