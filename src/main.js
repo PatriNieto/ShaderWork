@@ -7,11 +7,32 @@ import vertexShader2 from './shaders/shader2/vertex.glsl?raw';
 import fragmentShader2 from './shaders/shader2/frag.glsl?raw';
 import vertexShader3 from './shaders/shader3/vertex.glsl?raw';
 import fragmentShader3 from './shaders/shader3/frag.glsl?raw';
+import vertexShader4 from './shaders/shader4/vertex.glsl?raw';
+import fragmentShader4 from './shaders/shader4/frag.glsl?raw';
+import fragmentShader5 from './shaders/shader5/frag.glsl?raw';
 
 // Define tus shaders
 const shaders = [
+   {
+    name: 'Squared',
+    vertex: vertexShader4,
+    fragment: fragmentShader5,
+    uniforms: {
+      u_time: { value: 0.0 },
+      u_resolution: { value: new THREE.Vector2() }
+    }
+  },
   {
-    name: 'Gradient Wave',
+    name: 'World, U and I',
+    vertex: vertexShader4,
+    fragment: fragmentShader4,
+    uniforms: {
+      u_time: { value: 0.0 },
+      u_resolution: { value: new THREE.Vector2() }
+    }
+  },
+  {
+    name: 'Hypnosapo',
     vertex: vertexShader1,
     fragment: fragmentShader1,
     uniforms: {
