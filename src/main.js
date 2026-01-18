@@ -11,9 +11,19 @@ import vertexShader4 from './shaders/shader4/vertex.glsl?raw';
 import fragmentShader4 from './shaders/shader4/frag.glsl?raw';
 import fragmentShader5 from './shaders/shader5/frag.glsl?raw';
 import fragmentShader6 from './shaders/shader6/frag.glsl?raw';
+import fragmentShader7 from './shaders/shader7/frag.glsl?raw';
 
 // Define tus shaders
 const shaders = [
+  {
+    name: 'Strobo',
+    vertex: vertexShader4,
+    fragment: fragmentShader7,
+    uniforms: {
+      u_time: { value: 0.0 },
+      u_resolution: { value: new THREE.Vector2() }
+    }
+  },
      {
     name: 'ChakrasColors',
     vertex: vertexShader4,
