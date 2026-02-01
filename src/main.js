@@ -15,9 +15,19 @@ import fragmentShader7 from './shaders/shader7/frag.glsl?raw';
 import fragmentShader8 from './shaders/shader8/frag.glsl?raw';
 import fragmentShader9 from './shaders/shader9/frag.glsl?raw';
 import fragmentShader10 from './shaders/shader10/frag.glsl?raw';
+import fragmentShader11 from './shaders/shader11/frag.glsl?raw';
 
 // Define tus shaders
 const shaders = [
+     {
+    name: 'Colores opuestos',
+    vertex: vertexShader4,
+    fragment: fragmentShader11,
+    uniforms: {
+      u_time: { value: 0.0 },
+      u_resolution: { value: new THREE.Vector2() }
+    }
+  },
     {
     name: 'Secuencia',
     vertex: vertexShader4,
