@@ -13,9 +13,29 @@ import fragmentShader5 from './shaders/shader5/frag.glsl?raw';
 import fragmentShader6 from './shaders/shader6/frag.glsl?raw';
 import fragmentShader7 from './shaders/shader7/frag.glsl?raw';
 import fragmentShader8 from './shaders/shader8/frag.glsl?raw';
+import fragmentShader9 from './shaders/shader9/frag.glsl?raw';
+import fragmentShader10 from './shaders/shader10/frag.glsl?raw';
 
 // Define tus shaders
 const shaders = [
+    {
+    name: 'Secuencia',
+    vertex: vertexShader4,
+    fragment: fragmentShader10,
+    uniforms: {
+      u_time: { value: 0.0 },
+      u_resolution: { value: new THREE.Vector2() }
+    }
+  },
+      {
+    name: 'Mondrian',
+    vertex: vertexShader4,
+    fragment: fragmentShader9,
+    uniforms: {
+      u_time: { value: 0.0 },
+      u_resolution: { value: new THREE.Vector2() }
+    }
+  },
     {
     name: 'Random Color Closings',
     vertex: vertexShader4,
